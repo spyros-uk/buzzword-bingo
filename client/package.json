@@ -1,0 +1,32 @@
+{
+  "name": "bingo-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "elm-live": "4.0.2",
+    "npm": "6.14.9",
+    "prettier": "2.2.1",
+    "prettier-plugin-elm": "0.7.0"
+  },
+  "scripts": {
+    "start": "npx elm-live src/Main.elm --open --dir=./static -- --output=static/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/spyros-uk/buzzword-bingo.git"
+  },
+  "keywords": [
+    "buzzword",
+    "bingo",
+    "elm"
+  ],
+  "author": "Spyros Papaioannou",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/spyros-uk/buzzword-bingo/issues"
+  },
+  "homepage": "https://github.com/spyros-uk/buzzword-bingo#readme"
+}

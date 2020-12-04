@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "phrase": "Future-Proof",
+      "points": 100
+    },
+    {
+      "id": 2,
+      "phrase": "Doing Agile",
+      "points": 200
+    },
+    {
+      "id": 3,
+      "phrase": "In The Cloud",
+      "points": 300
+    },
+    {
+      "id": 4,
+      "phrase": "Rock-Star Ninja",
+      "points": 400
+    },
+    {
+      "id": 5,
+      "phrase": "Best of Breed",
+      "points": 150
+    },
+    {
+      "id": 6,
+      "phrase": "Reactive",
+      "points": 250
+    },
+    {
+      "id": 7,
+      "phrase": "Zero to Hero",
+      "points": 350
+    },
+    {
+      "id": 8,
+      "phrase": "User-Centric",
+      "points": 175
+    },
+    {
+      "id": 9,
+      "phrase": "Cross-Platform",
+      "points": 225
+    },
+    {
+      "id": 10,
+      "phrase": "Synergize",
+      "points": 375
+    }
+  ],
+  "scores": [
+    {
+      "id": 1,
+      "name": "Larry",
+      "score": 1000
+    },
+    {
+      "id": 2,
+      "name": "Moe",
+      "score": 3000
+    },
+    {
+      "id": 3,
+      "name": "Curly",
+      "score": 2000
+    },
+    {
+      "name": "Anonymous",
+      "score": 1075,
+      "id": 4
+    },
+    {
+      "name": "Mike",
+      "score": 1175,
+      "id": 5
+    },
+    {
+      "name": "Anonymous",
+      "score": 1375,
+      "id": 6
+    },
+    {
+      "name": "Anonymous",
+      "score": 1300,
+      "id": 7
+    }
+  ]
+}
