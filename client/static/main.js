@@ -4404,18 +4404,92 @@ var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$footer = _VirtualDom_node('footer');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$viewFooter = A2(
+	$elm$html$Html$footer,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$a,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$href('https://elm-lang.org/')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Powered by Elm')
+				]))
+		]));
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$header = _VirtualDom_node('header');
+var $author$project$Main$viewHeader = function (title) {
+	return A2(
+		$elm$html$Html$header,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(title)
+					]))
+			]));
+};
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $author$project$Main$playerInfo = F2(
 	function (playerName, gameNumber) {
 		return playerName + (' - Game #' + $elm$core$String$fromInt(gameNumber));
 	});
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$String$toUpper = _String_toUpper;
-var $author$project$Main$playerInfoText = F2(
+var $author$project$Main$viewPlayerInfo = F2(
 	function (playerName, gameNumber) {
-		return $elm$html$Html$text(
+		var playerInfoText = $elm$html$Html$text(
 			$elm$core$String$toUpper(
 				A2($author$project$Main$playerInfo, playerName, gameNumber)));
+		return A2(
+			$elm$html$Html$h2,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id('info'),
+					$elm$html$Html$Attributes$class('classy')
+				]),
+			_List_fromArray(
+				[playerInfoText]));
 	});
-var $author$project$Main$main = A2($author$project$Main$playerInfoText, 'Spyros', 3);
+var $author$project$Main$viewMain = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('content')
+		]),
+	_List_fromArray(
+		[
+			$author$project$Main$viewHeader('Buzzword Bingo'),
+			A2($author$project$Main$viewPlayerInfo, 'Spyros', 3),
+			$author$project$Main$viewFooter
+		]));
+var $author$project$Main$main = $author$project$Main$viewMain;
 _Platform_export({'Main':{'init':_VirtualDom_init($author$project$Main$main)(0)(0)}});}(this));
