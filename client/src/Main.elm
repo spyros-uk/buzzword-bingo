@@ -3,7 +3,7 @@ module Main exposing (..)
 import Basics
 import Browser exposing (sandbox)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
-import Html.Attributes exposing (class, href, id)
+import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
 import List
 import String
@@ -44,13 +44,25 @@ initialEntries =
 
 type Msg
     = NewGame
+    | Mark Int
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         NewGame ->
-            { model | gameNumber = model.gameNumber + 1 }
+            { model | gameNumber = model.gameNumber + 1, entries = initialEntries }
+
+        Mark id ->
+            let
+                updateMark entry =
+                    if entry.id == id then
+                        { entry | marked = not entry.marked }
+
+                    else
+                        entry
+            in
+            { model | entries = List.map updateMark model.entries }
 
 
 
@@ -86,9 +98,9 @@ viewFooter =
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
 
 
-viewEntryItem : Entry -> Html msg
+viewEntryItem : Entry -> Html Msg
 viewEntryItem entry =
-    li []
+    li [ classList [ ( "marked", entry.marked ) ], onClick (Mark entry.id) ]
         [ span [ class "phrase" ]
             [ text entry.phrase ]
         , span [ class "points" ]
@@ -98,7 +110,7 @@ viewEntryItem entry =
         ]
 
 
-viewEntryList : List Entry -> Html msg
+viewEntryList : List Entry -> Html Msg
 viewEntryList entries =
     entries
         |> List.map viewEntryItem
@@ -111,7 +123,7 @@ viewMain model =
         [ viewHeader "Buzzword Bingo"
         , viewPlayerInfo model.playerName model.gameNumber
 
-        --, div [ class "debug" ] [ text (Debug.toString initialModel) ]
+        --, div [ class "debug" ] [ text (Debug.toString model) ]
         , viewEntryList model.entries
         , div [ class "button-group" ]
             [ button [ onClick NewGame ] [ text "New Game" ]

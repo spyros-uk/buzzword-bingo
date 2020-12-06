@@ -5177,11 +5177,26 @@ var $elm$browser$Browser$sandbox = function (impl) {
 			view: impl.view
 		});
 };
+var $elm$core$Basics$not = _Basics_not;
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		return _Utils_update(
-			model,
-			{gameNumber: model.gameNumber + 1});
+		if (msg.$ === 'NewGame') {
+			return _Utils_update(
+				model,
+				{entries: $author$project$Main$initialEntries, gameNumber: model.gameNumber + 1});
+		} else {
+			var id = msg.a;
+			var updateMark = function (entry) {
+				return _Utils_eq(entry.id, id) ? _Utils_update(
+					entry,
+					{marked: !entry.marked}) : entry;
+			};
+			return _Utils_update(
+				model,
+				{
+					entries: A2($elm$core$List$map, updateMark, model.entries)
+				});
+		}
 	});
 var $author$project$Main$NewGame = {$: 'NewGame'};
 var $elm$html$Html$button = _VirtualDom_node('button');
@@ -5215,12 +5230,49 @@ var $elm$html$Html$Events$onClick = function (msg) {
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$Mark = function (a) {
+	return {$: 'Mark', a: a};
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewEntryItem = function (entry) {
 	return A2(
 		$elm$html$Html$li,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$classList(
+				_List_fromArray(
+					[
+						_Utils_Tuple2('marked', entry.marked)
+					])),
+				$elm$html$Html$Events$onClick(
+				$author$project$Main$Mark(entry.id))
+			]),
 		_List_fromArray(
 			[
 				A2(
