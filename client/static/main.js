@@ -4404,6 +4404,18 @@ var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var $author$project$Main$Entry = F4(
+	function (id, phrase, points, marked) {
+		return {id: id, marked: marked, phrase: phrase, points: points};
+	});
+var $author$project$Main$initialEntries = _List_fromArray(
+	[
+		A4($author$project$Main$Entry, 1, 'Future-Proof', 100, false),
+		A4($author$project$Main$Entry, 2, 'Doing Agile', 200, false),
+		A4($author$project$Main$Entry, 3, 'In The Cloud', 300, false),
+		A4($author$project$Main$Entry, 4, 'Rock-Star Ninja', 400, false)
+	]);
+var $author$project$Main$initialModel = {entries: $author$project$Main$initialEntries, gameNumber: 1, playerName: 'Spyros'};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -4414,6 +4426,9 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$core$Debug$toString = _Debug_toString;
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$Attributes$href = function (url) {
@@ -4422,8 +4437,6 @@ var $elm$html$Html$Attributes$href = function (url) {
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$viewFooter = A2(
 	$elm$html$Html$footer,
 	_List_Nil,
@@ -4479,17 +4492,30 @@ var $author$project$Main$viewPlayerInfo = F2(
 			_List_fromArray(
 				[playerInfoText]));
 	});
-var $author$project$Main$viewMain = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('content')
-		]),
-	_List_fromArray(
-		[
-			$author$project$Main$viewHeader('Buzzword Bingo'),
-			A2($author$project$Main$viewPlayerInfo, 'Spyros', 3),
-			$author$project$Main$viewFooter
-		]));
-var $author$project$Main$main = $author$project$Main$viewMain;
+var $author$project$Main$viewMain = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('content')
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$viewHeader('Buzzword Bingo'),
+				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('debug')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$Debug$toString($author$project$Main$initialModel))
+					])),
+				$author$project$Main$viewFooter
+			]));
+};
+var $author$project$Main$main = $author$project$Main$viewMain($author$project$Main$initialModel);
 _Platform_export({'Main':{'init':_VirtualDom_init($author$project$Main$main)(0)(0)}});}(this));

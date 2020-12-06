@@ -6,6 +6,39 @@ import Html.Attributes exposing (class, href, id)
 import String
 
 
+
+-- MODEL:
+
+
+type alias Model =
+    { playerName : String, gameNumber : Int, entries : List Entry }
+
+
+type alias Entry =
+    { id : Int, phrase : String, points : Int, marked : Bool }
+
+
+initialModel : Model
+initialModel =
+    { playerName = "Spyros"
+    , gameNumber = 1
+    , entries = initialEntries
+    }
+
+
+initialEntries : List Entry
+initialEntries =
+    [ Entry 1 "Future-Proof" 100 False
+    , Entry 2 "Doing Agile" 200 False
+    , Entry 3 "In The Cloud" 300 False
+    , Entry 4 "Rock-Star Ninja" 400 False
+    ]
+
+
+
+-- VIEW:
+
+
 playerInfo : String -> Int -> String
 playerInfo playerName gameNumber =
     playerName ++ " - Game #" ++ String.fromInt gameNumber
@@ -35,15 +68,16 @@ viewFooter =
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
 
 
-viewMain : Html msg
-viewMain =
+viewMain : Model -> Html msg
+viewMain model =
     div [ class "content" ]
         [ viewHeader "Buzzword Bingo"
-        , viewPlayerInfo "Spyros" 3
+        , viewPlayerInfo model.playerName model.gameNumber
+        , div [ class "debug" ] [ text (Debug.toString initialModel) ]
         , viewFooter
         ]
 
 
 main : Html msg
 main =
-    viewMain
+    viewMain initialModel
