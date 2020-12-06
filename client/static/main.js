@@ -4426,9 +4426,115 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							$elm$core$List$foldl,
+							fn,
+							acc,
+							$elm$core$List$reverse(r4)) : A4($elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var $elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4($elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var $elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						$elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$core$Debug$toString = _Debug_toString;
+var $author$project$Main$viewEntryItem = function (entry) {
+	return A2(
+		$elm$html$Html$li,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('phrase')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(entry.phrase)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('points')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(entry.points))
+					]))
+			]));
+};
+var $author$project$Main$viewEntryList = function (entries) {
+	return A2(
+		$elm$html$Html$ul,
+		_List_Nil,
+		A2($elm$core$List$map, $author$project$Main$viewEntryItem, entries));
+};
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$Attributes$href = function (url) {
@@ -4503,17 +4609,7 @@ var $author$project$Main$viewMain = function (model) {
 			[
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('debug')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$Debug$toString($author$project$Main$initialModel))
-					])),
+				$author$project$Main$viewEntryList(model.entries),
 				$author$project$Main$viewFooter
 			]));
 };

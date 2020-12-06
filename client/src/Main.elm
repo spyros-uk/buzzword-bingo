@@ -1,8 +1,9 @@
 module Main exposing (..)
 
 import Basics
-import Html exposing (Html, a, div, footer, h1, h2, header, text)
+import Html exposing (Html, a, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, href, id)
+import List
 import String
 
 
@@ -68,12 +69,33 @@ viewFooter =
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
 
 
+viewEntryItem : Entry -> Html msg
+viewEntryItem entry =
+    li []
+        [ span [ class "phrase" ]
+            [ text entry.phrase ]
+        , span [ class "points" ]
+            [ text
+                (String.fromInt entry.points)
+            ]
+        ]
+
+
+viewEntryList : List Entry -> Html msg
+viewEntryList entries =
+    entries
+        |> List.map viewEntryItem
+        |> ul []
+
+
 viewMain : Model -> Html msg
 viewMain model =
     div [ class "content" ]
         [ viewHeader "Buzzword Bingo"
         , viewPlayerInfo model.playerName model.gameNumber
-        , div [ class "debug" ] [ text (Debug.toString initialModel) ]
+
+        --, div [ class "debug" ] [ text (Debug.toString initialModel) ]
+        , viewEntryList model.entries
         , viewFooter
         ]
 
