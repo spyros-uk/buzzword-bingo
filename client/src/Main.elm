@@ -1,8 +1,10 @@
 module Main exposing (..)
 
 import Basics
-import Html exposing (Html, a, div, footer, h1, h2, header, li, span, text, ul)
+import Browser exposing (sandbox)
+import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, href, id)
+import Html.Events exposing (onClick)
 import List
 import String
 
@@ -34,6 +36,21 @@ initialEntries =
     , Entry 3 "In The Cloud" 300 False
     , Entry 4 "Rock-Star Ninja" 400 False
     ]
+
+
+
+-- UPDATE:
+
+
+type Msg
+    = NewGame
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        NewGame ->
+            { model | gameNumber = model.gameNumber + 1 }
 
 
 
@@ -88,7 +105,7 @@ viewEntryList entries =
         |> ul []
 
 
-viewMain : Model -> Html msg
+viewMain : Model -> Html Msg
 viewMain model =
     div [ class "content" ]
         [ viewHeader "Buzzword Bingo"
@@ -96,10 +113,17 @@ viewMain model =
 
         --, div [ class "debug" ] [ text (Debug.toString initialModel) ]
         , viewEntryList model.entries
+        , div [ class "button-group" ]
+            [ button [ onClick NewGame ] [ text "New Game" ]
+            ]
         , viewFooter
         ]
 
 
-main : Html msg
+main : Program () Model Msg
 main =
-    viewMain initialModel
+    sandbox
+        { init = initialModel
+        , view = viewMain
+        , update = update
+        }
