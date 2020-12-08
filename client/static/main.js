@@ -5227,12 +5227,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$Mark = function (a) {
-	return {$: 'Mark', a: a};
-};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5244,6 +5238,29 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $author$project$Main$sumPoints = function (entries) {
+	return $elm$core$List$sum(
+		A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.points;
+			},
+			A2(
+				$elm$core$List$filter,
+				function ($) {
+					return $.marked;
+				},
+				entries)));
+};
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$Mark = function (a) {
+	return {$: 'Mark', a: a};
+};
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -5367,6 +5384,38 @@ var $author$project$Main$viewPlayerInfo = F2(
 			_List_fromArray(
 				[playerInfoText]));
 	});
+var $author$project$Main$viewScore = function (score) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('score')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('label')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Score')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('value')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(score))
+					]))
+			]));
+};
 var $author$project$Main$viewMain = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -5379,6 +5428,8 @@ var $author$project$Main$viewMain = function (model) {
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
 				$author$project$Main$viewEntryList(model.entries),
+				$author$project$Main$viewScore(
+				$author$project$Main$sumPoints(model.entries)),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(

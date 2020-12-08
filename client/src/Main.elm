@@ -69,6 +69,22 @@ update msg model =
 -- VIEW:
 
 
+sumPoints : List Entry -> Int
+sumPoints entries =
+    entries
+        |> List.filter .marked
+        |> List.map .points
+        |> List.sum
+
+
+viewScore : Int -> Html Msg
+viewScore score =
+    div [ class "score" ]
+        [ span [ class "label" ] [ text "Score" ]
+        , span [ class "value" ] [ text (String.fromInt score) ]
+        ]
+
+
 playerInfo : String -> Int -> String
 playerInfo playerName gameNumber =
     playerName ++ " - Game #" ++ String.fromInt gameNumber
@@ -125,6 +141,7 @@ viewMain model =
 
         --, div [ class "debug" ] [ text (Debug.toString model) ]
         , viewEntryList model.entries
+        , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
             [ button [ onClick NewGame ] [ text "New Game" ]
             ]
