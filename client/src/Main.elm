@@ -1,11 +1,12 @@
 module Main exposing (..)
 
 import Basics
-import Browser exposing (sandbox)
+import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
 import List
+import Random
 import String
 
 
@@ -45,13 +46,17 @@ initialEntries =
 type Msg
     = NewGame
     | Mark Int
+    | NewRandomNumber Int
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NewRandomNumber number ->
+            ( { model | gameNumber = number }, Cmd.none )
+
         NewGame ->
-            { model | gameNumber = model.gameNumber + 1, entries = initialEntries }
+            ( { model | entries = initialEntries }, generateRandomNumber )
 
         Mark id ->
             let
@@ -62,7 +67,16 @@ update msg model =
                     else
                         entry
             in
-            { model | entries = List.map updateMark model.entries }
+            ( { model | entries = List.map updateMark model.entries }, Cmd.none )
+
+
+
+-- COMMANDS:
+
+
+generateRandomNumber : Cmd Msg
+generateRandomNumber =
+    Random.generate NewRandomNumber (Random.int 1 100)
 
 
 
@@ -151,8 +165,9 @@ viewMain model =
 
 main : Program () Model Msg
 main =
-    sandbox
-        { init = initialModel
+    element
+        { init = \_ -> ( initialModel, Cmd.none )
         , view = viewMain
         , update = update
+        , subscriptions = \_ -> Sub.none
         }
