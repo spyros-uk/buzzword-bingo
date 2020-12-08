@@ -5,8 +5,8 @@ import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
+import Http exposing (Error, expectString, get, request)
 import List
-import Random
 import String
 
 
@@ -32,11 +32,7 @@ initialModel =
 
 initialEntries : List Entry
 initialEntries =
-    [ Entry 1 "Future-Proof" 100 False
-    , Entry 2 "Doing Agile" 200 False
-    , Entry 3 "In The Cloud" 300 False
-    , Entry 4 "Rock-Star Ninja" 400 False
-    ]
+    []
 
 
 
@@ -47,6 +43,7 @@ type Msg
     = NewGame
     | Mark Int
     | NewRandomNumber Int
+    | NewEntry (Result Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,7 +53,21 @@ update msg model =
             ( { model | gameNumber = number }, Cmd.none )
 
         NewGame ->
-            ( { model | entries = initialEntries }, generateRandomNumber )
+            ( { model | gameNumber = model.gameNumber + 1 }, getEntries )
+
+        NewEntry (Ok jsonString) ->
+            let
+                _ =
+                    Debug.log "It works!" jsonString
+            in
+            ( model, Cmd.none )
+
+        NewEntry (Err error) ->
+            let
+                _ =
+                    Debug.log "Oops!" error
+            in
+            ( model, Cmd.none )
 
         Mark id ->
             let
@@ -74,9 +85,14 @@ update msg model =
 -- COMMANDS:
 
 
-generateRandomNumber : Cmd Msg
-generateRandomNumber =
-    Random.generate NewRandomNumber (Random.int 1 100)
+entriesUrl : String
+entriesUrl =
+    "http://localhost:3000/random-entries"
+
+
+getEntries : Cmd Msg
+getEntries =
+    get { url = entriesUrl, expect = expectString NewEntry }
 
 
 
@@ -166,7 +182,7 @@ viewMain model =
 main : Program () Model Msg
 main =
     element
-        { init = \_ -> ( initialModel, Cmd.none )
+        { init = \_ -> ( initialModel, getEntries )
         , view = viewMain
         , update = update
         , subscriptions = \_ -> Sub.none
