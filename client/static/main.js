@@ -5323,6 +5323,22 @@ var $author$project$Main$NewEntry = function (a) {
 	return {$: 'NewEntry', a: a};
 };
 var $author$project$Main$entriesUrl = 'http://localhost:3000/random-entries';
+var $author$project$Main$Entry = F4(
+	function (id, phrase, points, marked) {
+		return {id: id, marked: marked, phrase: phrase, points: points};
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$entryDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Main$Entry,
+	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'phrase', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int),
+	$elm$json$Json$Decode$succeed(false));
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -5878,17 +5894,6 @@ var $elm$http$Http$expectStringResponse = F2(
 			$elm$core$Basics$identity,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
 	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
 var $elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -5900,6 +5905,17 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
 var $elm$http$Http$resolve = F2(
 	function (toResult, response) {
 		switch (response.$) {
@@ -5923,12 +5939,19 @@ var $elm$http$Http$resolve = F2(
 					toResult(body));
 		}
 	});
-var $elm$http$Http$expectString = function (toMsg) {
-	return A2(
-		$elm$http$Http$expectStringResponse,
-		toMsg,
-		$elm$http$Http$resolve($elm$core$Result$Ok));
-};
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
 var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
@@ -6102,9 +6125,13 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Main$getEntries = $elm$http$Http$get(
 	{
-		expect: $elm$http$Http$expectString($author$project$Main$NewEntry),
+		expect: A2(
+			$elm$http$Http$expectJson,
+			$author$project$Main$NewEntry,
+			$elm$json$Json$Decode$list($author$project$Main$entryDecoder)),
 		url: $author$project$Main$entriesUrl
 	});
 var $author$project$Main$initialEntries = _List_Nil;
@@ -6132,13 +6159,18 @@ var $author$project$Main$update = F2(
 						{gameNumber: model.gameNumber + 1}),
 					$author$project$Main$getEntries);
 			case 'NewEntry':
-				if (msg.a.$ === 'Ok') {
-					var jsonString = msg.a.a;
-					var _v1 = A2($elm$core$Debug$log, 'It works!', jsonString);
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var randomEntries = result.a;
+					var _v2 = A2($elm$core$Debug$log, 'It works!', randomEntries);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{entries: randomEntries}),
+						$elm$core$Platform$Cmd$none);
 				} else {
-					var error = msg.a.a;
-					var _v2 = A2($elm$core$Debug$log, 'Oops!', error);
+					var error = result.a;
+					var _v3 = A2($elm$core$Debug$log, 'Oops!', error);
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			default:

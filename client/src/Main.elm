@@ -5,7 +5,8 @@ import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
-import Http exposing (Error, expectString, get, request)
+import Http exposing (Error, expectJson, get)
+import Json.Decode as Decode exposing (Decoder, field, succeed)
 import List
 import String
 
@@ -43,7 +44,7 @@ type Msg
     = NewGame
     | Mark Int
     | NewRandomNumber Int
-    | NewEntry (Result Error String)
+    | NewEntry (Result Error (List Entry))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -55,19 +56,21 @@ update msg model =
         NewGame ->
             ( { model | gameNumber = model.gameNumber + 1 }, getEntries )
 
-        NewEntry (Ok jsonString) ->
-            let
-                _ =
-                    Debug.log "It works!" jsonString
-            in
-            ( model, Cmd.none )
+        NewEntry result ->
+            case result of
+                Ok randomEntries ->
+                    let
+                        _ =
+                            Debug.log "It works!" randomEntries
+                    in
+                    ( { model | entries = randomEntries }, Cmd.none )
 
-        NewEntry (Err error) ->
-            let
-                _ =
-                    Debug.log "Oops!" error
-            in
-            ( model, Cmd.none )
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Oops!" error
+                    in
+                    ( model, Cmd.none )
 
         Mark id ->
             let
@@ -82,6 +85,19 @@ update msg model =
 
 
 
+-- DECODERS:
+
+
+entryDecoder : Decoder Entry
+entryDecoder =
+    Decode.map4 Entry
+        (field "id" Decode.int)
+        (field "phrase" Decode.string)
+        (field "points" Decode.int)
+        (succeed False)
+
+
+
 -- COMMANDS:
 
 
@@ -92,7 +108,7 @@ entriesUrl =
 
 getEntries : Cmd Msg
 getEntries =
-    get { url = entriesUrl, expect = expectString NewEntry }
+    get { url = entriesUrl, expect = expectJson NewEntry (Decode.list entryDecoder) }
 
 
 
