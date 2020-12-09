@@ -6135,9 +6135,37 @@ var $author$project$Main$getEntries = $elm$http$Http$get(
 		url: $author$project$Main$entriesUrl
 	});
 var $author$project$Main$initialEntries = _List_Nil;
-var $author$project$Main$initialModel = {entries: $author$project$Main$initialEntries, gameNumber: 1, playerName: 'Spyros'};
+var $author$project$Main$initialModel = {entries: $author$project$Main$initialEntries, errorMessage: $elm$core$Maybe$Nothing, gameNumber: 1, playerName: 'Spyros'};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$errorToString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var url = error.a;
+			return 'The URL ' + (url + ' was invalid');
+		case 'Timeout':
+			return 'Unable to reach the server, try again';
+		case 'NetworkError':
+			return 'Unable to reach the server, check your network connection';
+		case 'BadStatus':
+			var code = error.a;
+			switch (code) {
+				case 500:
+					return 'The server had a problem, try again later';
+				case 400:
+					return 'Verify your information and try again';
+				case 401:
+					return 'Unauthorized';
+				case 404:
+					return 'Not found';
+				default:
+					return 'Unknown error';
+			}
+		default:
+			var errorMessage = error.a;
+			return errorMessage;
+	}
+};
 var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -6171,8 +6199,21 @@ var $author$project$Main$update = F2(
 				} else {
 					var error = result.a;
 					var _v3 = A2($elm$core$Debug$log, 'Oops!', error);
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								errorMessage: $elm$core$Maybe$Just(
+									$author$project$Main$errorToString(error))
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
+			case 'CloseErrorModal':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{errorMessage: $elm$core$Maybe$Nothing}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				var id = msg.a;
 				var updateMark = function (entry) {
@@ -6312,6 +6353,35 @@ var $author$project$Main$viewEntryList = function (entries) {
 		_List_Nil,
 		A2($elm$core$List$map, $author$project$Main$viewEntryItem, entries));
 };
+var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
+var $author$project$Main$viewErrorMessage = function (maybeErrorMessage) {
+	if (maybeErrorMessage.$ === 'Just') {
+		var message = maybeErrorMessage.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('alert')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('close'),
+							$elm$html$Html$Events$onClick($author$project$Main$CloseErrorModal)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('X')
+						])),
+					$elm$html$Html$text(message)
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$Attributes$href = function (url) {
@@ -6418,6 +6488,7 @@ var $author$project$Main$viewMain = function (model) {
 			[
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
+				$author$project$Main$viewErrorMessage(model.errorMessage),
 				$author$project$Main$viewEntryList(model.entries),
 				$author$project$Main$viewScore(
 				$author$project$Main$sumPoints(model.entries)),

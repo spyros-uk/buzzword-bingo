@@ -5,7 +5,7 @@ import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
-import Http exposing (Error, expectJson, get)
+import Http exposing (Error(..), expectJson, get)
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import List
 import String
@@ -16,7 +16,7 @@ import String
 
 
 type alias Model =
-    { playerName : String, gameNumber : Int, entries : List Entry }
+    { playerName : String, gameNumber : Int, entries : List Entry, errorMessage : Maybe String }
 
 
 type alias Entry =
@@ -28,6 +28,7 @@ initialModel =
     { playerName = "Spyros"
     , gameNumber = 1
     , entries = initialEntries
+    , errorMessage = Nothing
     }
 
 
@@ -45,6 +46,7 @@ type Msg
     | Mark Int
     | NewRandomNumber Int
     | NewEntry (Result Error (List Entry))
+    | CloseErrorModal
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,7 +72,10 @@ update msg model =
                         _ =
                             Debug.log "Oops!" error
                     in
-                    ( model, Cmd.none )
+                    ( { model | errorMessage = Just (errorToString error) }, Cmd.none )
+
+        CloseErrorModal ->
+            ( { model | errorMessage = Nothing }, Cmd.none )
 
         Mark id ->
             let
@@ -82,6 +87,39 @@ update msg model =
                         entry
             in
             ( { model | entries = List.map updateMark model.entries }, Cmd.none )
+
+
+errorToString : Http.Error -> String
+errorToString error =
+    case error of
+        BadUrl url ->
+            "The URL " ++ url ++ " was invalid"
+
+        Timeout ->
+            "Unable to reach the server, try again"
+
+        NetworkError ->
+            "Unable to reach the server, check your network connection"
+
+        BadStatus code ->
+            case code of
+                500 ->
+                    "The server had a problem, try again later"
+
+                400 ->
+                    "Verify your information and try again"
+
+                401 ->
+                    "Unauthorized"
+
+                404 ->
+                    "Not found"
+
+                _ ->
+                    "Unknown error"
+
+        BadBody errorMessage ->
+            errorMessage
 
 
 
@@ -160,6 +198,19 @@ viewFooter =
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
 
 
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage maybeErrorMessage =
+    case maybeErrorMessage of
+        Just message ->
+            div [ class "alert" ]
+                [ span [ class "close", onClick CloseErrorModal ] [ text "X" ]
+                , text message
+                ]
+
+        Nothing ->
+            text ""
+
+
 viewEntryItem : Entry -> Html Msg
 viewEntryItem entry =
     li [ classList [ ( "marked", entry.marked ) ], onClick (Mark entry.id) ]
@@ -186,6 +237,7 @@ viewMain model =
         , viewPlayerInfo model.playerName model.gameNumber
 
         --, div [ class "debug" ] [ text (Debug.toString model) ]
+        , viewErrorMessage model.errorMessage
         , viewEntryList model.entries
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
