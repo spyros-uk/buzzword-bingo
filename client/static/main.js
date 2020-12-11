@@ -6135,7 +6135,7 @@ var $author$project$Main$getEntries = $elm$http$Http$get(
 		url: $author$project$Main$entriesUrl
 	});
 var $author$project$Main$initialEntries = _List_Nil;
-var $author$project$Main$initialModel = {entries: $author$project$Main$initialEntries, errorMessage: $elm$core$Maybe$Nothing, gameNumber: 1, playerName: 'Spyros'};
+var $author$project$Main$initialModel = {alertMessage: $elm$core$Maybe$Nothing, entries: $author$project$Main$initialEntries, gameNumber: 1, playerName: 'Spyros'};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$errorToString = function (error) {
@@ -6162,14 +6162,105 @@ var $author$project$Main$errorToString = function (error) {
 					return 'Unknown error';
 			}
 		default:
-			var errorMessage = error.a;
-			return errorMessage;
+			var alertMessage = error.a;
+			return alertMessage;
 	}
 };
 var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Basics$not = _Basics_not;
+var $author$project$Main$NewScore = function (a) {
+	return {$: 'NewScore', a: a};
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $elm$http$Http$post = function (r) {
+	return $elm$http$Http$request(
+		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $author$project$Main$GameScore = F3(
+	function (id, name, points) {
+		return {id: id, name: name, points: points};
+	});
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Main$scoreDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Main$GameScore,
+	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int));
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $author$project$Main$sumPoints = function (entries) {
+	return $elm$core$List$sum(
+		A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.points;
+			},
+			A2(
+				$elm$core$List$filter,
+				function ($) {
+					return $.marked;
+				},
+				entries)));
+};
+var $author$project$Main$scoreEncoder = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(model.playerName)),
+				_Utils_Tuple2(
+				'points',
+				$elm$json$Json$Encode$int(
+					$author$project$Main$sumPoints(model.entries)))
+			]));
+};
+var $author$project$Main$shareGameScore = function (model) {
+	var scoreUrl = 'http://localhost:3000/scores';
+	var body = $elm$http$Http$jsonBody(
+		$author$project$Main$scoreEncoder(model));
+	return $elm$http$Http$post(
+		{
+			body: body,
+			expect: A2($elm$http$Http$expectJson, $author$project$Main$NewScore, $author$project$Main$scoreDecoder),
+			url: scoreUrl
+		});
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6203,8 +6294,35 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								errorMessage: $elm$core$Maybe$Just(
+								alertMessage: $elm$core$Maybe$Just(
 									$author$project$Main$errorToString(error))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'ShareScore':
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$shareGameScore(model));
+			case 'NewScore':
+				var response = msg.a;
+				if (response.$ === 'Ok') {
+					var score = response.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								alertMessage: $elm$core$Maybe$Just(
+									'Your score: ' + ($elm$core$String$fromInt(score.points) + ' was successfully shared!'))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var error = response.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								alertMessage: $elm$core$Maybe$Just(
+									'Error posting your score: ' + $author$project$Main$errorToString(error))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -6212,7 +6330,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{errorMessage: $elm$core$Maybe$Nothing}),
+						{alertMessage: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				var id = msg.a;
@@ -6231,8 +6349,8 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$NewGame = {$: 'NewGame'};
+var $author$project$Main$ShareScore = {$: 'ShareScore'};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6259,36 +6377,38 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$List$sum = function (numbers) {
-	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
-};
-var $author$project$Main$sumPoints = function (entries) {
-	return $elm$core$List$sum(
-		A2(
-			$elm$core$List$map,
-			function ($) {
-				return $.points;
-			},
-			A2(
-				$elm$core$List$filter,
-				function ($) {
-					return $.marked;
-				},
-				entries)));
-};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Main$viewAlertMessage = function (maybeAlertMessage) {
+	if (maybeAlertMessage.$ === 'Just') {
+		var message = maybeAlertMessage.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('alert')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('close'),
+							$elm$html$Html$Events$onClick($author$project$Main$CloseErrorModal)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('X')
+						])),
+					$elm$html$Html$text(message)
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$Mark = function (a) {
 	return {$: 'Mark', a: a};
@@ -6308,7 +6428,6 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
 var $elm$html$Html$li = _VirtualDom_node('li');
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewEntryItem = function (entry) {
 	return A2(
 		$elm$html$Html$li,
@@ -6352,35 +6471,6 @@ var $author$project$Main$viewEntryList = function (entries) {
 		$elm$html$Html$ul,
 		_List_Nil,
 		A2($elm$core$List$map, $author$project$Main$viewEntryItem, entries));
-};
-var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
-var $author$project$Main$viewErrorMessage = function (maybeErrorMessage) {
-	if (maybeErrorMessage.$ === 'Just') {
-		var message = maybeErrorMessage.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('alert')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$span,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('close'),
-							$elm$html$Html$Events$onClick($author$project$Main$CloseErrorModal)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('X')
-						])),
-					$elm$html$Html$text(message)
-				]));
-	} else {
-		return $elm$html$Html$text('');
-	}
 };
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
@@ -6488,7 +6578,7 @@ var $author$project$Main$viewMain = function (model) {
 			[
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
-				$author$project$Main$viewErrorMessage(model.errorMessage),
+				$author$project$Main$viewAlertMessage(model.alertMessage),
 				$author$project$Main$viewEntryList(model.entries),
 				$author$project$Main$viewScore(
 				$author$project$Main$sumPoints(model.entries)),
@@ -6509,6 +6599,16 @@ var $author$project$Main$viewMain = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('New Game')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$ShareScore)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Share Score')
 							]))
 					])),
 				$author$project$Main$viewFooter

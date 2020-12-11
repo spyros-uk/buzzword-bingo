@@ -5,8 +5,9 @@ import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
-import Http exposing (Error(..), expectJson, get)
+import Http exposing (Error(..), expectJson, get, jsonBody, post)
 import Json.Decode as Decode exposing (Decoder, field, succeed)
+import Json.Encode as Encode exposing (Value)
 import List
 import String
 
@@ -16,11 +17,15 @@ import String
 
 
 type alias Model =
-    { playerName : String, gameNumber : Int, entries : List Entry, errorMessage : Maybe String }
+    { playerName : String, gameNumber : Int, entries : List Entry, alertMessage : Maybe String }
 
 
 type alias Entry =
     { id : Int, phrase : String, points : Int, marked : Bool }
+
+
+type alias GameScore =
+    { id : Int, name : String, points : Int }
 
 
 initialModel : Model
@@ -28,7 +33,7 @@ initialModel =
     { playerName = "Spyros"
     , gameNumber = 1
     , entries = initialEntries
-    , errorMessage = Nothing
+    , alertMessage = Nothing
     }
 
 
@@ -47,6 +52,8 @@ type Msg
     | NewRandomNumber Int
     | NewEntry (Result Error (List Entry))
     | CloseErrorModal
+    | ShareScore
+    | NewScore (Result Error GameScore)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,10 +79,21 @@ update msg model =
                         _ =
                             Debug.log "Oops!" error
                     in
-                    ( { model | errorMessage = Just (errorToString error) }, Cmd.none )
+                    ( { model | alertMessage = Just (errorToString error) }, Cmd.none )
+
+        ShareScore ->
+            ( model, shareGameScore model )
+
+        NewScore response ->
+            case response of
+                Ok score ->
+                    ( { model | alertMessage = Just ("Your score: " ++ String.fromInt score.points ++ " was successfully shared!") }, Cmd.none )
+
+                Err error ->
+                    ( { model | alertMessage = Just ("Error posting your score: " ++ errorToString error) }, Cmd.none )
 
         CloseErrorModal ->
-            ( { model | errorMessage = Nothing }, Cmd.none )
+            ( { model | alertMessage = Nothing }, Cmd.none )
 
         Mark id ->
             let
@@ -118,12 +136,28 @@ errorToString error =
                 _ ->
                     "Unknown error"
 
-        BadBody errorMessage ->
-            errorMessage
+        BadBody alertMessage ->
+            alertMessage
 
 
 
--- DECODERS:
+-- ENCODERS/DECODERS:
+
+
+scoreEncoder : Model -> Value
+scoreEncoder model =
+    Encode.object
+        [ ( "name", Encode.string model.playerName )
+        , ( "points", Encode.int (sumPoints model.entries) )
+        ]
+
+
+scoreDecoder : Decoder GameScore
+scoreDecoder =
+    Decode.map3 GameScore
+        (field "id" Decode.int)
+        (field "name" Decode.string)
+        (field "points" Decode.int)
 
 
 entryDecoder : Decoder Entry
@@ -147,6 +181,23 @@ entriesUrl =
 getEntries : Cmd Msg
 getEntries =
     get { url = entriesUrl, expect = expectJson NewEntry (Decode.list entryDecoder) }
+
+
+shareGameScore : Model -> Cmd Msg
+shareGameScore model =
+    let
+        scoreUrl =
+            "http://localhost:3000/scores"
+
+        body =
+            scoreEncoder model
+                |> jsonBody
+    in
+    post
+        { url = scoreUrl
+        , body = body
+        , expect = expectJson NewScore scoreDecoder
+        }
 
 
 
@@ -198,9 +249,9 @@ viewFooter =
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
 
 
-viewErrorMessage : Maybe String -> Html Msg
-viewErrorMessage maybeErrorMessage =
-    case maybeErrorMessage of
+viewAlertMessage : Maybe String -> Html Msg
+viewAlertMessage maybeAlertMessage =
+    case maybeAlertMessage of
         Just message ->
             div [ class "alert" ]
                 [ span [ class "close", onClick CloseErrorModal ] [ text "X" ]
@@ -237,11 +288,12 @@ viewMain model =
         , viewPlayerInfo model.playerName model.gameNumber
 
         --, div [ class "debug" ] [ text (Debug.toString model) ]
-        , viewErrorMessage model.errorMessage
+        , viewAlertMessage model.alertMessage
         , viewEntryList model.entries
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
             [ button [ onClick NewGame ] [ text "New Game" ]
+            , button [ onClick ShareScore ] [ text "Share Score" ]
             ]
         , viewFooter
         ]
