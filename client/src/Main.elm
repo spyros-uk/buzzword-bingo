@@ -3,7 +3,7 @@ module Main exposing (..)
 import Basics
 import Browser exposing (element)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
-import Html.Attributes exposing (class, classList, href, id)
+import Html.Attributes exposing (class, classList, disabled, href, id)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), expectJson, get, jsonBody, post)
 import Json.Decode as Decode exposing (Decoder, field, succeed)
@@ -173,21 +173,21 @@ entryDecoder =
 -- COMMANDS:
 
 
-entriesUrl : String
-entriesUrl =
-    "http://localhost:3000/random-entries"
+serverUrl : String -> String
+serverUrl resource =
+    "http://localhost:3000/" ++ resource
 
 
 getEntries : Cmd Msg
 getEntries =
-    get { url = entriesUrl, expect = expectJson NewEntry (Decode.list entryDecoder) }
+    get { url = serverUrl "random-entries", expect = expectJson NewEntry (Decode.list entryDecoder) }
 
 
 shareGameScore : Model -> Cmd Msg
 shareGameScore model =
     let
         scoreUrl =
-            "http://localhost:3000/scores"
+            serverUrl "scores"
 
         body =
             scoreEncoder model
@@ -283,6 +283,14 @@ viewEntryList entries =
 
 viewMain : Model -> Html Msg
 viewMain model =
+    let
+        shareScoreDisabled =
+            if sumPoints model.entries > 0 then
+                False
+
+            else
+                True
+    in
     div [ class "content" ]
         [ viewHeader "Buzzword Bingo"
         , viewPlayerInfo model.playerName model.gameNumber
@@ -293,7 +301,7 @@ viewMain model =
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
             [ button [ onClick NewGame ] [ text "New Game" ]
-            , button [ onClick ShareScore ] [ text "Share Score" ]
+            , button [ onClick ShareScore, disabled shareScoreDisabled ] [ text "Share Score" ]
             ]
         , viewFooter
         ]

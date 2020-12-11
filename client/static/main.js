@@ -5322,7 +5322,6 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$NewEntry = function (a) {
 	return {$: 'NewEntry', a: a};
 };
-var $author$project$Main$entriesUrl = 'http://localhost:3000/random-entries';
 var $author$project$Main$Entry = F4(
 	function (id, phrase, points, marked) {
 		return {id: id, marked: marked, phrase: phrase, points: points};
@@ -6126,13 +6125,16 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$serverUrl = function (resource) {
+	return 'http://localhost:3000/' + resource;
+};
 var $author$project$Main$getEntries = $elm$http$Http$get(
 	{
 		expect: A2(
 			$elm$http$Http$expectJson,
 			$author$project$Main$NewEntry,
 			$elm$json$Json$Decode$list($author$project$Main$entryDecoder)),
-		url: $author$project$Main$entriesUrl
+		url: $author$project$Main$serverUrl('random-entries')
 	});
 var $author$project$Main$initialEntries = _List_Nil;
 var $author$project$Main$initialModel = {alertMessage: $elm$core$Maybe$Nothing, entries: $author$project$Main$initialEntries, gameNumber: 1, playerName: 'Spyros'};
@@ -6251,7 +6253,7 @@ var $author$project$Main$scoreEncoder = function (model) {
 			]));
 };
 var $author$project$Main$shareGameScore = function (model) {
-	var scoreUrl = 'http://localhost:3000/scores';
+	var scoreUrl = $author$project$Main$serverUrl('scores');
 	var body = $elm$http$Http$jsonBody(
 		$author$project$Main$scoreEncoder(model));
 	return $elm$http$Http$post(
@@ -6359,6 +6361,15 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6568,6 +6579,7 @@ var $author$project$Main$viewScore = function (score) {
 			]));
 };
 var $author$project$Main$viewMain = function (model) {
+	var shareScoreDisabled = ($author$project$Main$sumPoints(model.entries) > 0) ? false : true;
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -6604,7 +6616,8 @@ var $author$project$Main$viewMain = function (model) {
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
-								$elm$html$Html$Events$onClick($author$project$Main$ShareScore)
+								$elm$html$Html$Events$onClick($author$project$Main$ShareScore),
+								$elm$html$Html$Attributes$disabled(shareScoreDisabled)
 							]),
 						_List_fromArray(
 							[
