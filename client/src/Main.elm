@@ -2,9 +2,9 @@ module Main exposing (..)
 
 import Basics
 import Browser exposing (element)
-import Html exposing (Html, a, button, div, footer, h1, h2, header, li, span, text, ul)
-import Html.Attributes exposing (class, classList, disabled, href, id)
-import Html.Events exposing (onClick)
+import Html exposing (Html, a, button, div, footer, h1, h2, header, input, li, span, text, ul)
+import Html.Attributes exposing (autofocus, class, classList, disabled, href, id, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Http exposing (Error(..), expectJson, get, jsonBody, post)
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Json.Encode as Encode exposing (Value)
@@ -16,8 +16,19 @@ import String
 -- MODEL:
 
 
+type GameState
+    = EnteringName
+    | Playing
+
+
 type alias Model =
-    { playerName : String, gameNumber : Int, entries : List Entry, alertMessage : Maybe String }
+    { playerName : String
+    , gameNumber : Int
+    , entries : List Entry
+    , alertMessage : Maybe String
+    , nameInput : String
+    , gameState : GameState
+    }
 
 
 type alias Entry =
@@ -30,10 +41,12 @@ type alias GameScore =
 
 initialModel : Model
 initialModel =
-    { playerName = "Spyros"
+    { playerName = "Anonymous"
     , gameNumber = 1
     , entries = initialEntries
     , alertMessage = Nothing
+    , nameInput = ""
+    , gameState = EnteringName
     }
 
 
@@ -54,6 +67,10 @@ type Msg
     | CloseErrorModal
     | ShareScore
     | NewScore (Result Error GameScore)
+    | SetNameInput String
+    | SaveName
+    | CancelName
+    | ChangeGameState GameState
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,6 +122,24 @@ update msg model =
                         entry
             in
             ( { model | entries = List.map updateMark model.entries }, Cmd.none )
+
+        SetNameInput nameOfPlayer ->
+            ( { model | nameInput = nameOfPlayer }, Cmd.none )
+
+        SaveName ->
+            ( { model
+                | playerName = model.nameInput
+                , nameInput = ""
+                , gameState = Playing
+              }
+            , Cmd.none
+            )
+
+        CancelName ->
+            ( { model | nameInput = "", gameState = Playing }, Cmd.none )
+
+        ChangeGameState gameState ->
+            ( { model | gameState = gameState }, Cmd.none )
 
 
 errorToString : Http.Error -> String
@@ -220,22 +255,13 @@ viewScore score =
         ]
 
 
-playerInfo : String -> Int -> String
-playerInfo playerName gameNumber =
-    playerName ++ " - Game #" ++ String.fromInt gameNumber
-
-
-viewPlayerInfo : String -> Int -> Html msg
+viewPlayerInfo : String -> Int -> Html Msg
 viewPlayerInfo playerName gameNumber =
-    let
-        playerInfoText =
-            playerInfo playerName gameNumber
-                |> String.toUpper
-                |> text
-    in
     h2
         [ id "info", class "classy" ]
-        [ playerInfoText ]
+        [ a [ href "#", onClick (ChangeGameState EnteringName) ] [ text playerName ]
+        , text (" - Game #" ++ String.fromInt gameNumber)
+        ]
 
 
 viewHeader : String -> Html msg
@@ -247,6 +273,20 @@ viewFooter : Html msg
 viewFooter =
     footer []
         [ a [ href "https://elm-lang.org/" ] [ text "Powered by Elm" ] ]
+
+
+viewPlayerName : Model -> Html Msg
+viewPlayerName model =
+    case model.gameState of
+        EnteringName ->
+            div [ class "name-input" ]
+                [ input [ type_ "text", placeholder "Who's playing", autofocus True, onInput SetNameInput, value model.nameInput ] []
+                , button [ type_ "button", onClick SaveName ] [ text "Save" ]
+                , button [ type_ "button", onClick CancelName ] [ text "Cancel" ]
+                ]
+
+        Playing ->
+            text ""
 
 
 viewAlertMessage : Maybe String -> Html Msg
@@ -297,6 +337,7 @@ viewMain model =
 
         --, div [ class "debug" ] [ text (Debug.toString model) ]
         , viewAlertMessage model.alertMessage
+        , viewPlayerName model
         , viewEntryList model.entries
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]

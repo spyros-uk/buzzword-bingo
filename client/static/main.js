@@ -6136,10 +6136,12 @@ var $author$project$Main$getEntries = $elm$http$Http$get(
 			$elm$json$Json$Decode$list($author$project$Main$entryDecoder)),
 		url: $author$project$Main$serverUrl('random-entries')
 	});
+var $author$project$Main$EnteringName = {$: 'EnteringName'};
 var $author$project$Main$initialEntries = _List_Nil;
-var $author$project$Main$initialModel = {alertMessage: $elm$core$Maybe$Nothing, entries: $author$project$Main$initialEntries, gameNumber: 1, playerName: 'Spyros'};
+var $author$project$Main$initialModel = {alertMessage: $elm$core$Maybe$Nothing, entries: $author$project$Main$initialEntries, gameNumber: 1, gameState: $author$project$Main$EnteringName, nameInput: '', playerName: 'Anonymous'};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$Playing = {$: 'Playing'};
 var $author$project$Main$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
@@ -6334,7 +6336,7 @@ var $author$project$Main$update = F2(
 						model,
 						{alertMessage: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'Mark':
 				var id = msg.a;
 				var updateMark = function (entry) {
 					return _Utils_eq(entry.id, id) ? _Utils_update(
@@ -6347,6 +6349,32 @@ var $author$project$Main$update = F2(
 						{
 							entries: A2($elm$core$List$map, updateMark, model.entries)
 						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SetNameInput':
+				var nameOfPlayer = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{nameInput: nameOfPlayer}),
+					$elm$core$Platform$Cmd$none);
+			case 'SaveName':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{gameState: $author$project$Main$Playing, nameInput: '', playerName: model.nameInput}),
+					$elm$core$Platform$Cmd$none);
+			case 'CancelName':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{gameState: $author$project$Main$Playing, nameInput: ''}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var gameState = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{gameState: gameState}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -6524,18 +6552,13 @@ var $author$project$Main$viewHeader = function (title) {
 					]))
 			]));
 };
+var $author$project$Main$ChangeGameState = function (a) {
+	return {$: 'ChangeGameState', a: a};
+};
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $author$project$Main$playerInfo = F2(
-	function (playerName, gameNumber) {
-		return playerName + (' - Game #' + $elm$core$String$fromInt(gameNumber));
-	});
-var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$Main$viewPlayerInfo = F2(
 	function (playerName, gameNumber) {
-		var playerInfoText = $elm$html$Html$text(
-			$elm$core$String$toUpper(
-				A2($author$project$Main$playerInfo, playerName, gameNumber)));
 		return A2(
 			$elm$html$Html$h2,
 			_List_fromArray(
@@ -6544,8 +6567,113 @@ var $author$project$Main$viewPlayerInfo = F2(
 					$elm$html$Html$Attributes$class('classy')
 				]),
 			_List_fromArray(
-				[playerInfoText]));
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href('#'),
+							$elm$html$Html$Events$onClick(
+							$author$project$Main$ChangeGameState($author$project$Main$EnteringName))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(playerName)
+						])),
+					$elm$html$Html$text(
+					' - Game #' + $elm$core$String$fromInt(gameNumber))
+				]));
 	});
+var $author$project$Main$CancelName = {$: 'CancelName'};
+var $author$project$Main$SaveName = {$: 'SaveName'};
+var $author$project$Main$SetNameInput = function (a) {
+	return {$: 'SetNameInput', a: a};
+};
+var $elm$html$Html$Attributes$autofocus = $elm$html$Html$Attributes$boolProperty('autofocus');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$viewPlayerName = function (model) {
+	var _v0 = model.gameState;
+	if (_v0.$ === 'EnteringName') {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('name-input')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('text'),
+							$elm$html$Html$Attributes$placeholder('Who\'s playing'),
+							$elm$html$Html$Attributes$autofocus(true),
+							$elm$html$Html$Events$onInput($author$project$Main$SetNameInput),
+							$elm$html$Html$Attributes$value(model.nameInput)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('button'),
+							$elm$html$Html$Events$onClick($author$project$Main$SaveName)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Save')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('button'),
+							$elm$html$Html$Events$onClick($author$project$Main$CancelName)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Cancel')
+						]))
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
 var $author$project$Main$viewScore = function (score) {
 	return A2(
 		$elm$html$Html$div,
@@ -6591,6 +6719,7 @@ var $author$project$Main$viewMain = function (model) {
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
 				$author$project$Main$viewAlertMessage(model.alertMessage),
+				$author$project$Main$viewPlayerName(model),
 				$author$project$Main$viewEntryList(model.entries),
 				$author$project$Main$viewScore(
 				$author$project$Main$sumPoints(model.entries)),
