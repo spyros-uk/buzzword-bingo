@@ -6626,6 +6626,7 @@ var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProp
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$viewPlayerName = function (model) {
+	var isSaveNameDisabled = $elm$core$String$isEmpty(model.nameInput);
 	var _v0 = model.gameState;
 	if (_v0.$ === 'EnteringName') {
 		return A2(
@@ -6652,7 +6653,8 @@ var $author$project$Main$viewPlayerName = function (model) {
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$type_('button'),
-							$elm$html$Html$Events$onClick($author$project$Main$SaveName)
+							$elm$html$Html$Events$onClick($author$project$Main$SaveName),
+							$elm$html$Html$Attributes$disabled(isSaveNameDisabled)
 						]),
 					_List_fromArray(
 						[

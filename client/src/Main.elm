@@ -277,11 +277,15 @@ viewFooter =
 
 viewPlayerName : Model -> Html Msg
 viewPlayerName model =
+    let
+        isSaveNameDisabled =
+            String.isEmpty model.nameInput
+    in
     case model.gameState of
         EnteringName ->
             div [ class "name-input" ]
                 [ input [ type_ "text", placeholder "Who's playing", autofocus True, onInput SetNameInput, value model.nameInput ] []
-                , button [ type_ "button", onClick SaveName ] [ text "Save" ]
+                , button [ type_ "button", onClick SaveName, disabled isSaveNameDisabled ] [ text "Save" ]
                 , button [ type_ "button", onClick CancelName ] [ text "Cancel" ]
                 ]
 
