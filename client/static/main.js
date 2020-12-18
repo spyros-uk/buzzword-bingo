@@ -6142,7 +6142,7 @@ var $author$project$Main$initialModel = {alertMessage: $elm$core$Maybe$Nothing, 
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$Playing = {$: 'Playing'};
-var $author$project$Main$errorToString = function (error) {
+var $author$project$HttpErroHandlers$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
 			var url = error.a;
@@ -6299,7 +6299,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								alertMessage: $elm$core$Maybe$Just(
-									$author$project$Main$errorToString(error))
+									$author$project$HttpErroHandlers$errorToString(error))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -6326,7 +6326,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								alertMessage: $elm$core$Maybe$Just(
-									'Error posting your score: ' + $author$project$Main$errorToString(error))
+									'Error posting your score: ' + $author$project$HttpErroHandlers$errorToString(error))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -6378,9 +6378,9 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
 var $author$project$Main$NewGame = {$: 'NewGame'};
 var $author$project$Main$ShareScore = {$: 'ShareScore'};
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6389,6 +6389,8 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -6398,7 +6400,6 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6418,36 +6419,53 @@ var $elm$html$Html$Events$onClick = function (msg) {
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
-var $elm$html$Html$span = _VirtualDom_node('span');
-var $author$project$Main$viewAlertMessage = function (maybeAlertMessage) {
-	if (maybeAlertMessage.$ === 'Just') {
-		var message = maybeAlertMessage.a;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $author$project$View$Buttons$primaryButton = F3(
+	function (onClickCommand, isDisabled, buttonText) {
 		return A2(
-			$elm$html$Html$div,
+			$elm$html$Html$button,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('alert')
+					$elm$html$Html$Attributes$type_('button'),
+					$elm$html$Html$Attributes$class('primary'),
+					$elm$html$Html$Events$onClick(onClickCommand),
+					$elm$html$Html$Attributes$disabled(isDisabled)
 				]),
 			_List_fromArray(
 				[
-					A2(
-					$elm$html$Html$span,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('close'),
-							$elm$html$Html$Events$onClick($author$project$Main$CloseErrorModal)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('X')
-						])),
-					$elm$html$Html$text(message)
+					$elm$html$Html$text(buttonText)
 				]));
-	} else {
-		return $elm$html$Html$text('');
-	}
-};
+	});
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$View$AlertMessage$viewAlertMessage = F2(
+	function (maybeAlertMessage, onCloseCommand) {
+		if (maybeAlertMessage.$ === 'Just') {
+			var message = maybeAlertMessage.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('alert')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('close'),
+								$elm$html$Html$Events$onClick(onCloseCommand)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('X')
+							])),
+						$elm$html$Html$text(message)
+					]));
+		} else {
+			return $elm$html$Html$text('');
+		}
+	});
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$Mark = function (a) {
 	return {$: 'Mark', a: a};
@@ -6623,7 +6641,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$viewPlayerName = function (model) {
 	var isSaveNameDisabled = $elm$core$String$isEmpty(model.nameInput);
@@ -6648,29 +6665,8 @@ var $author$project$Main$viewPlayerName = function (model) {
 							$elm$html$Html$Attributes$value(model.nameInput)
 						]),
 					_List_Nil),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$type_('button'),
-							$elm$html$Html$Events$onClick($author$project$Main$SaveName),
-							$elm$html$Html$Attributes$disabled(isSaveNameDisabled)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Save')
-						])),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$type_('button'),
-							$elm$html$Html$Events$onClick($author$project$Main$CancelName)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Cancel')
-						]))
+					A3($author$project$View$Buttons$primaryButton, $author$project$Main$SaveName, isSaveNameDisabled, 'Save'),
+					A3($author$project$View$Buttons$primaryButton, $author$project$Main$CancelName, false, 'Cancel')
 				]));
 	} else {
 		return $elm$html$Html$text('');
@@ -6720,7 +6716,7 @@ var $author$project$Main$viewMain = function (model) {
 			[
 				$author$project$Main$viewHeader('Buzzword Bingo'),
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
-				$author$project$Main$viewAlertMessage(model.alertMessage),
+				A2($author$project$View$AlertMessage$viewAlertMessage, model.alertMessage, $author$project$Main$CloseErrorModal),
 				$author$project$Main$viewPlayerName(model),
 				$author$project$Main$viewEntryList(model.entries),
 				$author$project$Main$viewScore(
@@ -6733,27 +6729,8 @@ var $author$project$Main$viewMain = function (model) {
 					]),
 				_List_fromArray(
 					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$NewGame)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('New Game')
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ShareScore),
-								$elm$html$Html$Attributes$disabled(shareScoreDisabled)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Share Score')
-							]))
+						A3($author$project$View$Buttons$primaryButton, $author$project$Main$NewGame, false, 'New Game'),
+						A3($author$project$View$Buttons$primaryButton, $author$project$Main$ShareScore, shareScoreDisabled, 'Share Score')
 					])),
 				$author$project$Main$viewFooter
 			]));

@@ -2,14 +2,17 @@ module Main exposing (..)
 
 import Basics
 import Browser exposing (element)
-import Html exposing (Html, a, button, div, footer, h1, h2, header, input, li, span, text, ul)
-import Html.Attributes exposing (autofocus, class, classList, disabled, href, id, placeholder, type_, value)
+import Html exposing (Html, a, div, footer, h1, h2, header, input, li, span, text, ul)
+import Html.Attributes exposing (autofocus, class, classList, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (Error(..), expectJson, get, jsonBody, post)
+import HttpErroHandlers exposing (errorToString)
 import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Json.Encode as Encode exposing (Value)
 import List
 import String
+import View.AlertMessage exposing (viewAlertMessage)
+import View.Buttons exposing (primaryButton)
 
 
 
@@ -142,39 +145,6 @@ update msg model =
             ( { model | gameState = gameState }, Cmd.none )
 
 
-errorToString : Http.Error -> String
-errorToString error =
-    case error of
-        BadUrl url ->
-            "The URL " ++ url ++ " was invalid"
-
-        Timeout ->
-            "Unable to reach the server, try again"
-
-        NetworkError ->
-            "Unable to reach the server, check your network connection"
-
-        BadStatus code ->
-            case code of
-                500 ->
-                    "The server had a problem, try again later"
-
-                400 ->
-                    "Verify your information and try again"
-
-                401 ->
-                    "Unauthorized"
-
-                404 ->
-                    "Not found"
-
-                _ ->
-                    "Unknown error"
-
-        BadBody alertMessage ->
-            alertMessage
-
-
 
 -- ENCODERS/DECODERS:
 
@@ -285,24 +255,11 @@ viewPlayerName model =
         EnteringName ->
             div [ class "name-input" ]
                 [ input [ type_ "text", placeholder "Who's playing", autofocus True, onInput SetNameInput, value model.nameInput ] []
-                , button [ type_ "button", onClick SaveName, disabled isSaveNameDisabled ] [ text "Save" ]
-                , button [ type_ "button", onClick CancelName ] [ text "Cancel" ]
+                , primaryButton SaveName isSaveNameDisabled "Save"
+                , primaryButton CancelName False "Cancel"
                 ]
 
         Playing ->
-            text ""
-
-
-viewAlertMessage : Maybe String -> Html Msg
-viewAlertMessage maybeAlertMessage =
-    case maybeAlertMessage of
-        Just message ->
-            div [ class "alert" ]
-                [ span [ class "close", onClick CloseErrorModal ] [ text "X" ]
-                , text message
-                ]
-
-        Nothing ->
             text ""
 
 
@@ -340,13 +297,13 @@ viewMain model =
         , viewPlayerInfo model.playerName model.gameNumber
 
         --, div [ class "debug" ] [ text (Debug.toString model) ]
-        , viewAlertMessage model.alertMessage
+        , viewAlertMessage model.alertMessage CloseErrorModal
         , viewPlayerName model
         , viewEntryList model.entries
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
-            [ button [ onClick NewGame ] [ text "New Game" ]
-            , button [ onClick ShareScore, disabled shareScoreDisabled ] [ text "Share Score" ]
+            [ primaryButton NewGame False "New Game"
+            , primaryButton ShareScore shareScoreDisabled "Share Score"
             ]
         , viewFooter
         ]
