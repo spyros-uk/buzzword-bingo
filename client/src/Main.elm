@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Basics
 import Browser exposing (element)
+import Entries exposing (Entry, viewEntryList)
 import Html exposing (Html, a, div, footer, h1, h2, header, input, li, span, text, ul)
 import Html.Attributes exposing (autofocus, class, classList, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -32,10 +33,6 @@ type alias Model =
     , nameInput : String
     , gameState : GameState
     }
-
-
-type alias Entry =
-    { id : Int, phrase : String, points : Int, marked : Bool }
 
 
 type alias GameScore =
@@ -263,25 +260,6 @@ viewPlayerName model =
             text ""
 
 
-viewEntryItem : Entry -> Html Msg
-viewEntryItem entry =
-    li [ classList [ ( "marked", entry.marked ) ], onClick (Mark entry.id) ]
-        [ span [ class "phrase" ]
-            [ text entry.phrase ]
-        , span [ class "points" ]
-            [ text
-                (String.fromInt entry.points)
-            ]
-        ]
-
-
-viewEntryList : List Entry -> Html Msg
-viewEntryList entries =
-    entries
-        |> List.map viewEntryItem
-        |> ul []
-
-
 viewMain : Model -> Html Msg
 viewMain model =
     let
@@ -299,7 +277,7 @@ viewMain model =
         --, div [ class "debug" ] [ text (Debug.toString model) ]
         , viewAlertMessage model.alertMessage CloseErrorModal
         , viewPlayerName model
-        , viewEntryList model.entries
+        , viewEntryList model.entries Mark
         , viewScore (sumPoints model.entries)
         , div [ class "button-group" ]
             [ primaryButton NewGame False "New Game"

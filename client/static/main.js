@@ -5322,7 +5322,7 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$NewEntry = function (a) {
 	return {$: 'NewEntry', a: a};
 };
-var $author$project$Main$Entry = F4(
+var $author$project$Entries$Entry = F4(
 	function (id, phrase, points, marked) {
 		return {id: id, marked: marked, phrase: phrase, points: points};
 	});
@@ -5332,7 +5332,7 @@ var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$entryDecoder = A5(
 	$elm$json$Json$Decode$map4,
-	$author$project$Main$Entry,
+	$author$project$Entries$Entry,
 	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'phrase', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int),
@@ -6379,6 +6379,9 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$CloseErrorModal = {$: 'CloseErrorModal'};
+var $author$project$Main$Mark = function (a) {
+	return {$: 'Mark', a: a};
+};
 var $author$project$Main$NewGame = {$: 'NewGame'};
 var $author$project$Main$ShareScore = {$: 'ShareScore'};
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -6467,9 +6470,6 @@ var $author$project$View$AlertMessage$viewAlertMessage = F2(
 		}
 	});
 var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$Mark = function (a) {
-	return {$: 'Mark', a: a};
-};
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -6485,50 +6485,57 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
 var $elm$html$Html$li = _VirtualDom_node('li');
-var $author$project$Main$viewEntryItem = function (entry) {
-	return A2(
-		$elm$html$Html$li,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$classList(
-				_List_fromArray(
-					[
-						_Utils_Tuple2('marked', entry.marked)
-					])),
-				$elm$html$Html$Events$onClick(
-				$author$project$Main$Mark(entry.id))
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$span,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('phrase')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(entry.phrase)
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('points')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(entry.points))
-					]))
-			]));
-};
-var $author$project$Main$viewEntryList = function (entries) {
-	return A2(
-		$elm$html$Html$ul,
-		_List_Nil,
-		A2($elm$core$List$map, $author$project$Main$viewEntryItem, entries));
-};
+var $author$project$Entries$viewEntryItem = F2(
+	function (entry, msg) {
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$classList(
+					_List_fromArray(
+						[
+							_Utils_Tuple2('marked', entry.marked)
+						])),
+					$elm$html$Html$Events$onClick(
+					msg(entry.id))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('phrase')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(entry.phrase)
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('points')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(entry.points))
+						]))
+				]));
+	});
+var $author$project$Entries$viewEntryList = F2(
+	function (entries, msg) {
+		return A2(
+			$elm$html$Html$ul,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (entry) {
+					return A2($author$project$Entries$viewEntryItem, entry, msg);
+				},
+				entries));
+	});
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$Attributes$href = function (url) {
@@ -6718,7 +6725,7 @@ var $author$project$Main$viewMain = function (model) {
 				A2($author$project$Main$viewPlayerInfo, model.playerName, model.gameNumber),
 				A2($author$project$View$AlertMessage$viewAlertMessage, model.alertMessage, $author$project$Main$CloseErrorModal),
 				$author$project$Main$viewPlayerName(model),
-				$author$project$Main$viewEntryList(model.entries),
+				A2($author$project$Entries$viewEntryList, model.entries, $author$project$Main$Mark),
 				$author$project$Main$viewScore(
 				$author$project$Main$sumPoints(model.entries)),
 				A2(
