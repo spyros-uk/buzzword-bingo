@@ -6173,7 +6173,6 @@ var $author$project$HttpErroHandlers$errorToString = function (error) {
 var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$Main$NewScore = function (a) {
 	return {$: 'NewScore', a: a};
 };
@@ -6265,6 +6264,16 @@ var $author$project$Main$shareGameScore = function (model) {
 			url: scoreUrl
 		});
 };
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$Entries$updateEntries = F2(
+	function (entries, id) {
+		var updateMarked = function (entry) {
+			return _Utils_eq(entry.id, id) ? _Utils_update(
+				entry,
+				{marked: !entry.marked}) : entry;
+		};
+		return A2($elm$core$List$map, updateMarked, entries);
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6338,16 +6347,11 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Mark':
 				var id = msg.a;
-				var updateMark = function (entry) {
-					return _Utils_eq(entry.id, id) ? _Utils_update(
-						entry,
-						{marked: !entry.marked}) : entry;
-				};
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							entries: A2($elm$core$List$map, updateMark, model.entries)
+							entries: A2($author$project$Entries$updateEntries, model.entries, id)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SetNameInput':

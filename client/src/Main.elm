@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Basics
 import Browser exposing (element)
-import Entries exposing (Entry, viewEntryList)
+import Entries exposing (Entry, updateEntries, viewEntryList)
 import Html exposing (Html, a, div, footer, h1, h2, header, input, li, span, text, ul)
 import Html.Attributes exposing (autofocus, class, classList, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -113,15 +113,7 @@ update msg model =
             ( { model | alertMessage = Nothing }, Cmd.none )
 
         Mark id ->
-            let
-                updateMark entry =
-                    if entry.id == id then
-                        { entry | marked = not entry.marked }
-
-                    else
-                        entry
-            in
-            ( { model | entries = List.map updateMark model.entries }, Cmd.none )
+            ( { model | entries = updateEntries model.entries id }, Cmd.none )
 
         SetNameInput nameOfPlayer ->
             ( { model | nameInput = nameOfPlayer }, Cmd.none )
